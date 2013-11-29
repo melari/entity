@@ -1,0 +1,36 @@
+entity Vector2
+  static zero = Vector2.new(0, 0)
+  public x, y
+
+  { init(@x, @y) }
+
+component Physical
+  public position = Vector2.zero
+  public size = Vector2.zero
+
+component Visible
+  {! draw() }
+
+enum Color
+  white = 0xFFFFFF
+  black = 0x000000
+  red   = 0xFF0000
+  green = 0x00FF00
+  blue  = 0x0000FF
+
+component Colored
+  public color = Color.white
+
+entity Player
+  - Physical
+  - Visible
+  - Colored
+
+  { draw()
+    Draw.rectangle(position.x, position.y, size.x, size.y, color)
+  }
+
+system Menu
+  { init()
+
+  }
