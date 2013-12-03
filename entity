@@ -1,5 +1,12 @@
 #!/usr/bin/env ruby
 require 'terrun'
+require 'antlr3'
+require 'debugger'
+require_relative 'EntityLexer.rb'
+require_relative 'EntityParser.rb'
+
+require_relative 'evaluator.rb'
+require_relative 'expression.rb'
 
 module Entity
   class Compiler < TerminalRunner
@@ -16,7 +23,10 @@ module Entity
 
       input = ANTLR3::FileStream.new('example.e')
       lexer = Entity::Lexer.new(input)
-      tokens = ANTLR3::CommonTokenStrea.new(lexer)
+      tokens = ANTLR3::CommonTokenStream.new(lexer)
+      parser = Entity::Parser.new(tokens)
+      eval_tree = parser.expression
+      eval_tree.eval
     end
   end
 end

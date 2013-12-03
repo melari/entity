@@ -2,6 +2,13 @@ GEM
   remote: https://rubygems.org/
   specs:
     antlr3 (1.10.0)
+    columnize (0.3.6)
+    debugger (1.6.2)
+      columnize (>= 0.3.1)
+      debugger-linecache (~> 1.2.0)
+      debugger-ruby_core_source (~> 1.2.3)
+    debugger-linecache (1.2.0)
+    debugger-ruby_core_source (1.2.3)
     terrun (1.1.0)
 
 PLATFORMS
@@ -10,4 +17,5 @@ PLATFORMS
 
 DEPENDENCIES
   antlr3
+  debugger
   terrun
