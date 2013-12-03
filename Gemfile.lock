@@ -1,13 +1,13 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    polyglot (0.3.3)
-    treetop (1.4.15)
-      polyglot
-      polyglot (>= 0.3.1)
+    antlr3 (1.10.0)
+    terrun (1.1.0)
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
-  treetop
+  antlr3
+  terrun

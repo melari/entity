@@ -1,3 +1,4 @@
 source 'https://rubygems.org'
 
-gem 'treetop'
+gem 'antlr3'
+gem 'terrun'
