@@ -5,8 +5,19 @@ require 'debugger'
 require_relative 'EntityLexer.rb'
 require_relative 'EntityParser.rb'
 
-require_relative 'evaluator.rb'
-require_relative 'expression.rb'
+def require_directory(directory)
+  base_path = File.dirname(__FILE__)
+  Dir.entries(base_path + '/' + directory).each do |file|
+    next if file.start_with?('.')
+    full_path = "#{base_path}/#{directory}/#{file}"
+    require_directory(full_path) unless File.file?(full_path)
+    require_relative("#{directory}/#{file}") if File.file?(full_path)
+  end
+end
+
+require_directory 'evaluators'
+
+
 
 module Entity
   class Compiler < TerminalRunner

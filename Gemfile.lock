@@ -9,6 +9,7 @@ GEM
       debugger-ruby_core_source (~> 1.2.3)
     debugger-linecache (1.2.0)
     debugger-ruby_core_source (1.2.3)
+    require_directory (1.0.0)
     terrun (1.1.0)
 
 PLATFORMS
@@ -18,4 +19,5 @@ PLATFORMS
 DEPENDENCIES
   antlr3
   debugger
+  require_directory
   terrun

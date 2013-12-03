@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 #
-# Entity.g
+# lib/Entity.g
 # --
 # Generated using ANTLR version: 3.5
 # Ruby runtime library version: 1.10.0
-# Input grammar file: Entity.g
-# Generated at: 2013-12-03 10:53:49
+# Input grammar file: lib/Entity.g
+# Generated at: 2013-12-03 11:28:53
 #
 
 # ~~~> start load path setup
@@ -67,83 +67,80 @@ module Entity
     # define the token constants
     define_tokens( :EOF => -1, :DIGIT => 4 )
 
-
-    # register the proper human-readable name or literal value
-    # for each token type
-    #
-    # this is necessary because anonymous tokens, which are
-    # created from literal values in the grammar, do not
-    # have descriptive names
-    register_names( "DIGIT" )
-
-
   end
 
 
-  class Parser < ANTLR3::Parser
+  class Lexer < ANTLR3::Lexer
     @grammar_home = Entity
-
-    RULE_METHODS = [ :expression ].freeze
-
     include TokenData
 
     begin
-      generated_using( "Entity.g", "3.5", "1.10.0" )
+      generated_using( "lib/Entity.g", "3.5", "1.10.0" )
     rescue NoMethodError => error
       # ignore
     end
 
-    def initialize( input, options = {} )
+    RULE_NAMES   = [ "DIGIT" ].freeze
+    RULE_METHODS = [ :digit! ].freeze
+
+    def initialize( input=nil, options = {} )
       super( input, options )
     end
-    # - - - - - - - - - - - - Rules - - - - - - - - - - - - -
 
-    #
-    # parser rule expression
-    #
-    # (in Entity.g)
-    # 5:1: expression returns [value] : d= DIGIT ;
-    #
-    def expression
+
+    # - - - - - - - - - - - lexer rules - - - - - - - - - - - -
+    # lexer rule digit! (DIGIT)
+    # (in lib/Entity.g)
+    def digit!
       # -> uncomment the next line to manually enable rule tracing
       # trace_in( __method__, 1 )
 
 
-      value = nil
+
+      type = DIGIT
+      channel = ANTLR3::DEFAULT_CHANNEL
+    # - - - - label initialization - - - -
 
 
-      d = nil
-
-
-      begin
-      # at line 6:5: d= DIGIT
-      d = match( DIGIT, TOKENS_FOLLOWING_DIGIT_IN_expression_29 )
-
-      # --> action
-       value=ExpressionEval.new(d.text) 
-      # <-- action
-
-
-      rescue ANTLR3::Error::RecognitionError => re
-        report_error(re)
-        recover(re)
-
-      ensure
-        # -> uncomment the next line to manually enable rule tracing
-        # trace_out( __method__, 1 )
-
+      # - - - - main rule block - - - -
+      # at line 
+      if @input.peek( 1 ).between?( 0x30, 0x39 )
+        @input.consume
+      else
+        mse = MismatchedSet( nil )
+        recover mse
+        raise mse
 
       end
 
-      return value
+
+
+
+      @state.type = type
+      @state.channel = channel
+    ensure
+      # -> uncomment the next line to manually enable rule tracing
+      # trace_out( __method__, 1 )
+
+
     end
 
+    # main rule used to study the input at the current position,
+    # and choose the proper lexer rule to call in order to
+    # fetch the next token
+    #
+    # usually, you don't make direct calls to this method,
+    # but instead use the next_token method, which will
+    # build and emit the actual next token
+    def token!
+      # at line 1:10: DIGIT
+      digit!
 
 
-    TOKENS_FOLLOWING_DIGIT_IN_expression_29 = Set[ 1 ]
+    end
 
-  end # class Parser < ANTLR3::Parser
+  end # class Lexer < ANTLR3::Lexer
 
-  at_exit { Parser.main( ARGV ) } if __FILE__ == $0
+  at_exit { Lexer.main( ARGV ) } if __FILE__ == $0
 
 end
