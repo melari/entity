@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'terrun'
 require 'antlr3'
-require 'debugger'
 require_relative 'EntityLexer.rb'
 require_relative 'EntityParser.rb'
 
@@ -32,12 +31,40 @@ module Entity
         exit
       end
 
+      @@out = File.open('temp.cpp', 'w')
+
       input = ANTLR3::FileStream.new('example.e')
       lexer = Entity::Lexer.new(input)
       tokens = ANTLR3::CommonTokenStream.new(lexer)
       parser = Entity::Parser.new(tokens)
       eval_tree = parser.file
+
+      add_standard_header
       eval_tree.eval
+
+      @@out.close
+    end
+
+    def self.out(string)
+      @@out.puts string unless @@out.nil?
+      nil
+    end
+
+    def self.add_standard_header
+      out(<<-EOS
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Console
+{
+public:
+  static void out(std::string& output);
+};
+
+void Console::out(std::string& output) { std::cout << output; }
+      EOS
+      )
     end
   end
 end

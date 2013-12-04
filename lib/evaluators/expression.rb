@@ -1,9 +1,11 @@
+require_relative 'evaluator.rb'
+
 class ExpressionEval < Evaluator
-  def initialize(digit)
-    @digit = digit
+  def type
+    :void
   end
 
   def eval
-    puts @digit
+    nil
   end
 end
