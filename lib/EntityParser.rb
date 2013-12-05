@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.5
 # Ruby runtime library version: 1.10.0
 # Input grammar file: lib/Entity.g
-# Generated at: 2013-12-04 16:23:08
+# Generated at: 2013-12-05 08:52:08
 #
 
 # ~~~> start load path setup
@@ -442,7 +442,7 @@ module Entity
       name = match( IDENT, TOKENS_FOLLOWING_IDENT_IN_function_definition_171 )
 
       # --> action
-       value = FunctionDefinitionEval.new(name) 
+       value = FunctionDefinitionEval.new(name.text) 
       # <-- action
 
       # at line 35:3: ( CLOSE | NL (a= statement )* CLOSE )

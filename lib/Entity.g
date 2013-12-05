@@ -31,7 +31,7 @@ component_reference
   ;
 
 function_definition returns[value]
-  : OPEN name=IDENT { $value = FunctionDefinitionEval.new(name) }
+  : OPEN name=IDENT { $value = FunctionDefinitionEval.new($name.text) }
   ( CLOSE | NL (a=statement { $value.add_statement(a) } )* CLOSE )
   ;
 
