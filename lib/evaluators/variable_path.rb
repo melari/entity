@@ -5,6 +5,7 @@ class VariablePathEval < Evaluator
   end
 
   def add_path(path)
+    path = "::_new" if path == ".new"
     @path += "#{path}"
     @is_local = false
   end

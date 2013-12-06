@@ -23,4 +23,8 @@ module StatementList
   def evaluate_statements
     statements.each { |statement| statement.eval }
   end
+
+  def evaluate_statements_with_args(*args)
+    statements.each { |statement| statement.eval(*args) }
+  end
 end

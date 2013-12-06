@@ -25,6 +25,9 @@ module Entity
     option "--help", 0, "", "Show this help document"
     help ""
 
+    @@capturing = -1
+    @@capturing_string = []
+
     def self.run
       if @@options.include? "--help"
         show_usage
@@ -46,8 +49,36 @@ module Entity
     end
 
     def self.out(string)
-      @@out.puts string unless @@out.nil?
+      if capturing?
+        add_to_capture(string)
+      else
+        @@out.puts string unless @@out.nil?
+      end
       nil
+    end
+
+    def self.capture_string
+      @@capturing_string[@@capturing]
+    end
+
+    def self.capture_string=(value)
+      @@capturing_string[@@capturing] = value
+    end
+
+    def self.add_to_capture(value)
+      self.capture_string = capture_string + value
+    end
+
+    def self.capture
+      @@capturing += 1
+      self.capture_string = ""
+      result = yield || capture_string
+      @@capturing -= 1
+      result
+    end
+
+    def self.capturing?
+      @@capturing > -1
     end
 
     def self.add_standard_header
@@ -62,9 +93,11 @@ class Console
 {
 public:
   static void out(string output);
+  static void raw_out(string output);
 };
 
-void Console::out(string output) { printf("%s", output.c_str()); }
+void Console::out(string output) { printf("%s\\n", output.c_str()); }
+void Console::raw_out(string output) { printf("%s", output.c_str()); }
       EOS
       )
     end
