@@ -22,17 +22,37 @@ entity returns[value]
   ;
 
 class_body returns[value]
-  : a=( function_definition
+  : a=( instance_variable_declaration
+  | constructor_definition
+  | function_definition
   | component_reference
   ) NL? { $value = a }
+  ;
+
+instance_variable_declaration returns[value]
+  : type=variable_type a=IDENT { $value = InstanceVariableDeclarationEval.new(type, $a.text) }
+  (',' a=IDENT { $value.add_chained_variable($a.text) } )*
   ;
 
 component_reference
   : '-' IDENT NL
   ;
 
+constructor_definition returns[value]
+  : INIT { $value = ConstructorDefinitionEval.new }
+  ( '(' (
+    type=variable_type name=IDENT { $value.add_argument(type, $name.text) }
+    (',' type=variable_type name=IDENT { $value.add_argument(type, $name.text) } )*
+  )? ')' )?
+  ( CLOSE | NL (a=statement { $value.add_statement(a) })* CLOSE )
+  ;
+
 function_definition returns[value]
   : OPEN type=variable_type name=IDENT { $value = FunctionDefinitionEval.new(type, $name.text) }
+  ( '(' (
+    type=variable_type name=IDENT { $value.add_argument(type, $name.text) }
+    (',' type=variable_type name=IDENT { $value.add_argument(type, $name.text) } )*
+  )? ')' )?
   ( CLOSE | NL (a=statement { $value.add_statement(a) } )* CLOSE )
   ;
 
@@ -42,6 +62,7 @@ variable_type returns[value]
   | TYPE_BOOL
   | TYPE_STRING
   | TYPE_VOID
+  | IDENT
   ) { $value = $a.text }
   ;
 
@@ -130,7 +151,7 @@ add returns[value]
 
 relation returns[value]
   : a=add { $value = a }
-  (  type=('=' | '/=' | '<' | '<=' | '>=' | '>') b=relation
+  (  type=('==' | '/=' | '<' | '<=' | '>=' | '>') b=relation
      { $value = DoubleOperandExpressionEval.new($type.text, a, b) }
   )?
   ;
@@ -157,6 +178,7 @@ CHAR
   : '\'' . '\''
   ;
 
+INIT: 'init';
 OPEN: 'def';
 CLOSE: 'end';
 

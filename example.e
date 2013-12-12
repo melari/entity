@@ -1,3 +1,20 @@
+entity Vector2
+  float x, y
+  init(float _x, float _y)
+    x=_x
+    y=_y
+  end
+end
+
+def void main
+  x = 1.0
+  y = 2.0
+  v = Vector2.new(x, y)
+  v.test("hello world")
+end
+
+
+/*
 entity Player
   def string test
     p = Player.new()
@@ -23,6 +40,8 @@ def void main
   p = Player::_new()
   p.main()
 end
+
+*/
 
 
 /*

@@ -18,25 +18,43 @@ class FunctionDefinitionEval < Evaluator
     @name = name
   end
 
+  def arguments
+    @arguments ||= []
+  end
+
+  def add_argument(type, name)
+    arguments << [type, name]
+  end
+
   def name(klass = nil)
     klass.nil? ? @name : "#{klass}::#{@name}"
   end
 
-  def prototype(klass = nil)
-    "#{return_type(klass)} #{name(klass)}()"
+  def prototype(klass = nil, ignore_main = false)
+    "#{return_type(klass, ignore_main)} #{name(klass)}(#{argument_string})"
+  end
+
+  def argument_string
+    arguments.map { |arg| "#{arg[0]} #{arg[1]}"}.join(',')
   end
 
   def eval(klass = nil)
     @@function_types[name(klass)] = @type
 
     Entity::Compiler.out("#{prototype(klass)} {")
+    generate_body
+    Entity::Compiler.out("return 0;") if is_main?(klass)
+    Entity::Compiler.out("}")
+  end
+
+  protected
+
+  def generate_body
     used_variables = []
     required_variables.each do |variable|
       Entity::Compiler.out("#{variable[:type]} #{variable[:name]};")
     end
     evaluate_statements
-    Entity::Compiler.out("return 0;") if is_main?(klass)
-    Entity::Compiler.out("}")
   end
 
   private
@@ -45,7 +63,7 @@ class FunctionDefinitionEval < Evaluator
     @name == "main" && klass.nil?
   end
 
-  def return_type(klass)
-    is_main?(klass) ? 'int' : @type
+  def return_type(klass, ignore_main)
+    !ignore_main && is_main?(klass) ? 'int' : @type
   end
 end

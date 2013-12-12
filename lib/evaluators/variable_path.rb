@@ -1,4 +1,4 @@
-class VariablePathEval < Evaluator
+class VariablePathEval < ExpressionEval
   def initialize(base)
     @path = base
     @is_local = true
@@ -12,6 +12,10 @@ class VariablePathEval < Evaluator
 
   def is_local?
     @is_local
+  end
+
+  def type
+
   end
 
   def eval

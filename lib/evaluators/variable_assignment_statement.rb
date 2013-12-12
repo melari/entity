@@ -13,6 +13,7 @@ class VariableAssignmentStatementEval < StatementEval
   end
 
   def eval
-    Entity::Compiler.out("#{@variable_path_eval.eval} = #{@expression_eval.eval};")
+    expression = Entity::Compiler.capture { @expression_eval.eval }
+    Entity::Compiler.out("#{@variable_path_eval.eval} = #{expression};")
   end
 end
