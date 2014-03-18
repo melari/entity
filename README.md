@@ -15,7 +15,9 @@ This is still very much a work in progress, I am currently still in the process 
 - gcc
 
 $ rake mac:antlr:generate
+
 $ ruby lib\entity
+
 $ rake mac:compiler:run
 
 ### Windows
@@ -27,12 +29,15 @@ $ rake mac:compiler:run
 - [Nuwen MinGW distro](http://nuwen.net/mingw.html)
 
 $ rake windows:antlr:generate
+
 $ ruby lib\entity
+
 $ rake windows:compilr:run
 
 ## Language Spec (WIP)
 
 *It is suggested, although not required, that all entity source files use the file extension .e*
+
 Each file may contain as many class definitions as the creator sees fit, the compiler does not care.
 
 ### Referencing other source files {Unimplemented}
