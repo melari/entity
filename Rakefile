@@ -1,12 +1,13 @@
 namespace :windows do
   namespace :compiler do
     task :run do
-      `vsvars32.bat & cl temp.cpp`
+      `MinGW\\set_distro_paths.bat & g++ -std=c++11 temp.cpp`
     end
 
     task :clean do
       `del *.exe`
       `del *.obj`
+      `del *.out`
     end
   end
 

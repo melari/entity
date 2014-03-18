@@ -3,6 +3,7 @@ require 'terrun'
 require 'antlr3'
 require_relative 'EntityLexer.rb'
 require_relative 'EntityParser.rb'
+require_relative 'libraries.rb'
 
 def require_directory(directory)
   base_path = File.dirname(__FILE__)
@@ -42,7 +43,13 @@ module Entity
       parser = Entity::Parser.new(tokens)
       eval_tree = parser.file
 
-      add_standard_header
+      add_standard_libraries
+
+      eval_tree.register_function_types(nil)
+      eval_tree.register_types(nil)
+      TypeRegister.reset_context
+      puts "DONE REGISTRATION"
+
       eval_tree.eval
 
       @@out.close
@@ -81,25 +88,8 @@ module Entity
       @@capturing > -1
     end
 
-    def self.add_standard_header
-      out(<<-EOS
-#include <stdio.h>
-#include <iostream>
-#include <cstdio>
-#include <string>
-using namespace std;
-
-class Console
-{
-public:
-  static void out(string output);
-  static void raw_out(string output);
-};
-
-void Console::out(string output) { printf("%s\\n", output.c_str()); }
-void Console::raw_out(string output) { printf("%s", output.c_str()); }
-      EOS
-      )
+    def self.add_standard_libraries
+      out(Libraries.standard)
     end
   end
 end

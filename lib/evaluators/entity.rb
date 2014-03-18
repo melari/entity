@@ -20,13 +20,29 @@ class EntityEval < Evaluator
     "(#{joined})"
   end
 
-  def eval
+  def register_types(klass)
+    TypeRegister.current_class_context = @name
+    body_components.each { |c| c.register_types(@name) }
+  end
+
+  def register_function_types(klass)
+    TypeRegister.current_class_context = @name
+    TypeRegister.register_class(@name)
+    body_components.each { |c| c.register_function_types(@name) }
+  end
+
+  def eval_forward_prototype
+    Entity::Compiler.out("class #{@name}Class;")
+    Entity::Compiler.out("typedef shared_ptr<#{@name}Class> #{@name};")
+  end
+
+  def eval_prototype
+    TypeRegister.current_class_context = @name
+
     @constructor = nil
     @default_constructor_found = false
 
-    FunctionDefinitionEval.add_constructor(@name)
-
-    Entity::Compiler.out("class #{@name} {")
+    Entity::Compiler.out("class #{@name}Class {")
     Entity::Compiler.out("public:")
     body_components.delete_if do |body|
       if body.is_a? ConstructorDefinitionEval
@@ -35,6 +51,7 @@ class EntityEval < Evaluator
         Entity::Compiler.out("#{body.prototype(@name)};")
         false
       elsif body.is_a? FunctionDefinitionEval
+        TypeRegister.current_function_context = body.name(nil)
         Entity::Compiler.out("#{body.prototype(nil, true)};")
         false
       elsif body.is_a? InstanceVariableDeclarationEval
@@ -42,11 +59,16 @@ class EntityEval < Evaluator
         true
       end
     end
-    Entity::Compiler.out("#{@name}();") unless @default_constructor_found
+    Entity::Compiler.out("#{@name}Class();") unless @default_constructor_found
     Entity::Compiler.out("static #{@name} _new(#{constructor_argument_string});")
     Entity::Compiler.out("};");
-    Entity::Compiler.out("#{@name}::#{@name}(){}") unless @default_constructor_found
-    Entity::Compiler.out("#{@name} #{@name}::_new(#{constructor_argument_string}) { #{@name} x#{constructor_argument_call_string}; return x; }")
+  end
+
+  def eval
+    TypeRegister.current_class_context = @name
+
+    Entity::Compiler.out("#{@name}Class::#{@name}Class(){}") unless @default_constructor_found
+    Entity::Compiler.out("#{@name} #{@name}Class::_new(#{constructor_argument_string}) { #{@name} x(new #{@name}Class#{constructor_argument_call_string}); return x; }")
     evaluate_body(@name)
   end
 end

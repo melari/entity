@@ -48,7 +48,7 @@ constructor_definition returns[value]
   ;
 
 function_definition returns[value]
-  : OPEN type=variable_type name=IDENT { $value = FunctionDefinitionEval.new(type, $name.text) }
+  : OPEN type=variable_type name=IDENT { $value = FunctionDefinitionEval.new($name.text, type) }
   ( '(' (
     type=variable_type name=IDENT { $value.add_argument(type, $name.text) }
     (',' type=variable_type name=IDENT { $value.add_argument(type, $name.text) } )*
@@ -57,21 +57,25 @@ function_definition returns[value]
   ;
 
 variable_type returns[value]
-  : a=( TYPE_FLOAT
-  | TYPE_INT
-  | TYPE_BOOL
-  | TYPE_STRING
-  | TYPE_VOID
-  | IDENT
-  ) { $value = $a.text }
+  : ( a=( TYPE_FLOAT
+        | TYPE_INT
+        | TYPE_BOOL
+        | TYPE_STRING
+        ) { $value = $a.text.capitalize }
+    )
+  | ( a=( TYPE_VOID
+        | IDENT
+        ) { $value = $a.text }
+  )
   ;
 
 statement returns[value]
   : a=( if_statement
+  | while_statement
   | return_statement
-  | variable_assignment_statement
+  | (function_call_statement assignment_type)=> variable_assignment_statement
   | function_call_statement
-  ) NL?
+  ) NL*
   { $value = a }
   ;
 
@@ -80,25 +84,43 @@ if_statement returns[value]
   ( CLOSE | NL (b=statement { $value.add_statement(b) } )* CLOSE )
   ;
 
+while_statement returns[value]
+  : WHILE a=expression { $value = WhileStatementEval.new(a) }
+  ( CLOSE | NL (b=statement { $value.add_statement(b) } )* CLOSE )
+  ;
+
 return_statement returns[value]
   : RETURN a=expression { $value = ReturnStatementEval.new(a) }
   ;
 
 variable_assignment_statement returns[value]
-  : a=variable_path '=' b=expression { $value = VariableAssignmentStatementEval.new(a, b) }
+  :  a=function_call_statement type=assignment_type b=expression { $value = VariableAssignmentStatementEval.new(a, b, type) }
+  ;
+
+assignment_type returns[value]
+  : type=('=' | '+=' | '-=' | '*=' | '/=') { $value = $type.text }
   ;
 
 function_call_statement returns[value]
-  : a=variable_path '(' { $value = FunctionCallStatementEval.new(a) }
-  ( b=expression { $value.add_argument(b) }
-    (  ',' b=expression { $value.add_argument(b) }
-    )*
-  )? ')'
+  : name=IDENT args=function_arguments? chain=function_call_statement_float
+    {
+      $value = FunctionCallStatementEval.new($name.text, args)
+      $value.chain = chain unless chain.nil?
+    }
   ;
 
-variable_path returns[value]
-  : base=IDENT { $value = VariablePathEval.new($base.text) }
-  (path1=('.' | '::') path2=IDENT { $value.add_path($path1.text + $path2.text) } )*
+function_call_statement_float returns[value]
+  : relation_type=('.' | '::') name=IDENT args=function_arguments? chain=function_call_statement_float
+    {
+      $value = FunctionCallStatementEval.new($name.text, args)
+      $value.relation_type = $relation_type.text
+      $value.chain = chain unless chain.nil?
+    }
+  | /* epsilon */ { $value = nil }
+  ;
+
+function_arguments returns[value]
+  : '(' { $value = [] } ( b=expression { $value << b } ( ',' b=expression { $value << b } )* )? ')'
   ;
 
 component
@@ -116,15 +138,18 @@ enum
   ( CLOSE | NL class_body* CLOSE )
   ;
 
+literal returns[value]
+  : a=INTEGER { $value = LiteralEval.new(:Int, $a.text) }
+  | a=FLOAT   { $value = LiteralEval.new(:Float, $a.text) }
+  | a=BOOLEAN { $value = LiteralEval.new(:Bool, $a.text) }
+  | a=STRING  { $value = LiteralEval.new(:String, $a.text) }
+  | a=CHAR    { $value = LiteralEval.new(:Char, $a.text) }
+  ;
+
 term returns[value]
-  : b=variable_path { $value = b }
+  : b=literal { $value = b }
   | b=function_call_statement { $value = b }
   | '(' b=expression ')' { $value = ParenExpressionEval.new(b) }
-  | a=INTEGER { $value = LiteralEval.new(:int, $a.text) }
-  | a=FLOAT   { $value = LiteralEval.new(:float, $a.text) }
-  | a=BOOLEAN { $value = LiteralEval.new(:bool, $a.text) }
-  | a=STRING  { $value = LiteralEval.new(:string, $a.text) }
-  | a=CHAR    { $value = LiteralEval.new(:char, $a.text) }
   ;
 
 negation returns[value]
@@ -139,7 +164,7 @@ unary returns[value]
 
 mult returns[value]
   : a=unary { $value = a }
-  ( type=('*' | '/' | '%') b=mult  { $value = DoubleOperandExpressionEval.new($type.text, a, b) } )?
+  ( type=('*' | '/' | '%' | '^') b=mult  { $value = DoubleOperandExpressionEval.new($type.text, a, b) } )?
   ;
 
 add returns[value]
@@ -151,7 +176,7 @@ add returns[value]
 
 relation returns[value]
   : a=add { $value = a }
-  (  type=('==' | '/=' | '<' | '<=' | '>=' | '>') b=relation
+  (  type=('==' | '!=' | '<' | '<=' | '>=' | '>') b=relation
      { $value = DoubleOperandExpressionEval.new($type.text, a, b) }
   )?
   ;
@@ -196,6 +221,7 @@ ENUM: 'enum';
 IF: 'if';
 ELSE: 'else';
 RETURN: 'return';
+WHILE: 'while';
 
 IDENT: ('a' .. 'z' | 'A' .. 'Z' | '_') ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_')*;
 WS: (' ' | '\t')+ {$channel = HIDDEN};

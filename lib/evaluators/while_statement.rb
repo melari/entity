@@ -1,6 +1,6 @@
 require_relative 'statement.rb'
 
-class IfStatementEval < StatementEval
+class WhileStatementEval < StatementEval
   include StatementList
 
   def initialize(expression_eval)
@@ -8,7 +8,7 @@ class IfStatementEval < StatementEval
   end
 
   def eval
-    Entity::Compiler.out("if (#{@expression_eval.eval}->value){")
+    Entity::Compiler.out("while (#{@expression_eval.eval}->value){")
     evaluate_statements
     Entity::Compiler.out("}")
   end

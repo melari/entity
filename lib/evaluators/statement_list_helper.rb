@@ -7,7 +7,7 @@ module StatementList
     statements << statement
   end
 
-  def required_variables
+  def for_each_required_variable
     used = []
     result = []
     statements.each do |statement|
@@ -15,6 +15,7 @@ module StatementList
         next if used.include? variable[:name]
         used << variable[:name]
         result << variable
+        yield(variable)
       end
     end
     result

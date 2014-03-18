@@ -8,8 +8,12 @@ class LiteralEval < ExpressionEval
     @type
   end
 
+  def path_name
+    type
+  end
+
   def eval
-    return "(string)#{@value}" if type == :string
-    @value
+    output_value = type == :string ? "(string)#{@value}" : @value
+    "#{@type.capitalize}Class::_new(#{output_value})"
   end
 end

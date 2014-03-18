@@ -8,11 +8,13 @@ class ConstructorDefinitionEval < FunctionDefinitionEval
   end
 
   def prototype(klass)
-    "#{klass}(#{argument_string})"
+    "#{klass}Class(#{argument_string})"
   end
 
   def eval(klass)
-    Entity::Compiler.out("#{klass}::#{prototype(klass)} {")
+    TypeRegister.current_class_context = klass
+    TypeRegister.current_function_context = nil
+    Entity::Compiler.out("#{klass}Class::#{prototype(klass)} {")
     generate_body
     Entity::Compiler.out("}");
   end
